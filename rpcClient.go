@@ -17,7 +17,6 @@ type rpcClient struct {
 	user       string
 	passwd     string
 	httpClient *http.Client
-	timeout    int
 }
 
 // rpcRequest represent a RCP request
@@ -61,45 +60,34 @@ func newClient(host string, port int, user, passwd string, useSSL bool, timeout 
 		err = errors.New("bad call missing argument host")
 		return
 	}
-	var serverAddr string
+	var urlHttpPrefix string
 	var httpClient *http.Client
 	if useSSL {
-		serverAddr = "https://"
+		urlHttpPrefix = "https://"
 		t := &http.Transport{
 			TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
 		}
-		httpClient = &http.Client{Transport: t}
+		httpClient = &http.Client{
+			Transport: t,
+			Timeout:   time.Duration(timeout) * time.Second,
+		}
 	} else {
-		serverAddr = "http://"
-		httpClient = &http.Client{}
+		urlHttpPrefix = "http://"
+		httpClient = &http.Client{
+			Timeout: time.Duration(timeout),
+		}
 	}
-	c = &rpcClient{serverAddr: fmt.Sprintf("%s%s:%d", serverAddr, host, port), user: user, passwd: passwd, httpClient: httpClient, timeout: timeout}
+	c = &rpcClient{
+		serverAddr: fmt.Sprintf("%s%s:%d", urlHttpPrefix, host, port),
+		user:       user,
+		passwd:     passwd,
+		httpClient: httpClient,
+	}
 	return
-}
-
-// doTimeoutRequest process a HTTP request with timeout
-func (c *rpcClient) doTimeoutRequest(timer *time.Timer, req *http.Request) (*http.Response, error) {
-	type result struct {
-		resp *http.Response
-		err  error
-	}
-	done := make(chan result, 1)
-	go func() {
-		resp, err := c.httpClient.Do(req)
-		done <- result{resp, err}
-	}()
-	// Wait for the read or the timeout
-	select {
-	case r := <-done:
-		return r.resp, r.err
-	case <-timer.C:
-		return nil, errors.New("timeout reading data from server")
-	}
 }
 
 // call prepare & exec the request
 func (c *rpcClient) call(method string, params interface{}) (rr rpcResponse, err error) {
-	connectTimer := time.NewTimer(time.Duration(c.timeout) * time.Second)
 	rpcR := rpcRequest{method, params, time.Now().UnixNano(), "1.0"}
 	payloadBuffer := &bytes.Buffer{}
 	jsonEncoder := json.NewEncoder(payloadBuffer)
@@ -119,7 +107,7 @@ func (c *rpcClient) call(method string, params interface{}) (rr rpcResponse, err
 		req.SetBasicAuth(c.user, c.passwd)
 	}
 
-	resp, err := c.doTimeoutRequest(connectTimer, req)
+	resp, err := c.httpClient.Do(req)
 	if err != nil {
 		return
 	}
