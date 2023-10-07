@@ -6,7 +6,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"io/ioutil"
+	"io"
 	"net/http"
 	"time"
 )
@@ -58,7 +58,7 @@ type rpcResponse struct {
 
 func newClient(host string, port int, user, passwd string, useSSL bool, timeout int) (c *rpcClient, err error) {
 	if len(host) == 0 {
-		err = errors.New("Bad call missing argument host")
+		err = errors.New("bad call missing argument host")
 		return
 	}
 	var serverAddr string
@@ -93,7 +93,7 @@ func (c *rpcClient) doTimeoutRequest(timer *time.Timer, req *http.Request) (*htt
 	case r := <-done:
 		return r.resp, r.err
 	case <-timer.C:
-		return nil, errors.New("Timeout reading data from server")
+		return nil, errors.New("timeout reading data from server")
 	}
 }
 
@@ -125,7 +125,7 @@ func (c *rpcClient) call(method string, params interface{}) (rr rpcResponse, err
 	}
 	defer resp.Body.Close()
 
-	data, err := ioutil.ReadAll(resp.Body)
+	data, err := io.ReadAll(resp.Body)
 	if err != nil {
 		return
 	}

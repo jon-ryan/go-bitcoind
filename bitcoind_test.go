@@ -8,6 +8,7 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/jon-ryan/go-bitcoind/models"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 )
@@ -1482,7 +1483,7 @@ var _ = Describe("Bitcoind", func() {
 				Expect(err).NotTo(HaveOccurred())
 			})
 			It("should return a boolean ", func() {
-				Expect(list).Should(Equal([]ListAddressResult{
+				Expect(list).Should(Equal([]models.ListAddressResult{
 					{
 						Address: "1Pyizp4HK7Bfz7CdbSwHHtprk7Ghumhxmy",
 						Amount:  0.0002,
@@ -1497,72 +1498,6 @@ var _ = Describe("Bitcoind", func() {
 						Address: "1Bwq28f3eE1Aa3eKsc9ma2o7KX8S6PnHTK",
 						Amount:  0,
 						Account: "test2",
-					},
-				}))
-			})
-		})
-	})
-
-	Describe("Testing ListReceivedByAccount", func() {
-		Context("when success", func() {
-			handler := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-				fmt.Fprintln(w, `{"result":[{"account":"","amount":0.00000000,"confirmations":0},{"account":"tests","amount":0.00020000,"confirmations":12}],"error":null,"id":1400747404600680330}`)
-			})
-			ts, host, port, err := getNewTestServer(handler)
-			if err != nil {
-				log.Fatalln(err)
-			}
-			defer ts.Close()
-			bitcoindClient, _ := New(host, port, "x", "fake", false)
-			txID, err := bitcoindClient.ListReceivedByAccount(1, true)
-			It("should not error", func() {
-				Expect(err).NotTo(HaveOccurred())
-			})
-			It("should return a slice of ReceivedByAccount ", func() {
-				Expect(txID).Should(Equal([]ReceivedByAccount{
-					{
-						Account:       "",
-						Amount:        0,
-						Confirmations: 0,
-					}, {
-						Account:       "tests",
-						Amount:        0.0002,
-						Confirmations: 12,
-					},
-				}))
-			})
-		})
-	})
-
-	Describe("Testing ListReceivedByAddress", func() {
-		Context("when success", func() {
-			handler := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-				fmt.Fprintln(w, `{"result":[{"address":"1Pyizp4HK7Bfz7CdbSwHHtprk7Ghumhxmy","account":"tests","amount":0.00020000,"confirmations":13,"txids":["a1b7093d041bc1b763ba1ad894d2bd5376b38e6c7369613684e7140e8d9f7515","eb1c979a968f724f6114c2cce579bd2cac599c154870dae4fdd669319d332346"]},{"address":"1Bvs4PDXKsjPqsfftuXLteDf7bn5PRdyQV","account":"1KU5DX7jKECLxh1nYhmQ7CahY7GMNMVLP3","amount":0.00000000,"confirmations":0,"txids":[]}],"error":null,"id":1400749116266588395}`)
-			})
-			ts, host, port, err := getNewTestServer(handler)
-			if err != nil {
-				log.Fatalln(err)
-			}
-			defer ts.Close()
-			bitcoindClient, _ := New(host, port, "x", "fake", false)
-			txID, err := bitcoindClient.ListReceivedByAddress(1, true)
-			It("should not error", func() {
-				Expect(err).NotTo(HaveOccurred())
-			})
-			It("should return a slice of ReceivedByAddress ", func() {
-				Expect(txID).Should(Equal([]ReceivedByAddress{
-					{
-						Address:       "1Pyizp4HK7Bfz7CdbSwHHtprk7Ghumhxmy",
-						Account:       "tests",
-						Amount:        0.00020000,
-						Confirmations: 13,
-						TxIds:         []string{"a1b7093d041bc1b763ba1ad894d2bd5376b38e6c7369613684e7140e8d9f7515", "eb1c979a968f724f6114c2cce579bd2cac599c154870dae4fdd669319d332346"},
-					}, {
-						Address:       "1Bvs4PDXKsjPqsfftuXLteDf7bn5PRdyQV",
-						Account:       "1KU5DX7jKECLxh1nYhmQ7CahY7GMNMVLP3",
-						Amount:        0,
-						Confirmations: 0,
-						TxIds:         []string{},
 					},
 				}))
 			})
@@ -1974,7 +1909,7 @@ var _ = Describe("Bitcoind", func() {
 	Describe("Testing ValidateAddress", func() {
 		Context("when success", func() {
 			handler := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-				fmt.Fprintln(w, `{"result":{"isvalid":true,"address":"1Pyizp4HK7Bfz7CdbSwHHtprk7Ghumhxmy","ismine":true,"isscript":false,"pubkey":"02dc7ecd8baec59cf018bf40d1e948519dc0dcf256eb3bc3ed121bc3ee83c98b01","iscompressed":true,"account":"tests"},"error":null,"id":1401119296578850111}`)
+				fmt.Fprintln(w, `{"result":{"isvalid":true,"address":"1Pyizp4HK7Bfz7CdbSwHHtprk7Ghumhxmy",isscript":false,"pubkey":"02dc7ecd8baec59cf018bf40d1e948519dc0dcf256eb3bc3ed121bc3ee83c98b01","iscompressed":true,"account":"tests"},"error":null,"id":1401119296578850111}`)
 			})
 			ts, host, port, err := getNewTestServer(handler)
 			if err != nil {
@@ -1987,14 +1922,10 @@ var _ = Describe("Bitcoind", func() {
 				Expect(err).NotTo(HaveOccurred())
 			})
 			It("should return a string sig ", func() {
-				Expect(resp).Should(Equal(ValidateAddressResponse{
-					IsValid:      true,
-					Address:      "1Pyizp4HK7Bfz7CdbSwHHtprk7Ghumhxmy",
-					IsMine:       true,
-					IsScript:     false,
-					PubKey:       "02dc7ecd8baec59cf018bf40d1e948519dc0dcf256eb3bc3ed121bc3ee83c98b01",
-					IsCompressed: true,
-					Account:      "tests",
+				Expect(resp).Should(Equal(models.ValidateAddress{
+					IsValid:  true,
+					Address:  "1Pyizp4HK7Bfz7CdbSwHHtprk7Ghumhxmy",
+					IsScript: false,
 				}))
 			})
 		})
