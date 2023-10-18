@@ -256,7 +256,6 @@ func (b *Bitcoind) GetBlockchainInfo() (*models.BlockChainInfo, error) {
 	}
 	blockChainInfo := &models.BlockChainInfo{}
 	err = json.Unmarshal(r.Result, blockChainInfo)
-	blockChainInfo.VerificationProgressInt = uint64(blockChainInfo.VerificationProgressInt)
 	return blockChainInfo, err
 }
 
