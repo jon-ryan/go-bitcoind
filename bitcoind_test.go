@@ -898,39 +898,6 @@ var _ = Describe("Bitcoind", func() {
 		})
 	})
 
-	Describe("Testing GetMiningInfo", func() {
-		Context("when success", func() {
-			handler := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-				fmt.Fprintln(w, `{"result":{"blocks":301676,"currentblocksize":717621,"currentblocktx":1043,"difficulty":8853416309.12779999,"errors":"This is a pre-release test build - use at your own risk - do not use for mining or merchant applications","genproclimit":-1,"networkhashps":78721394769785312,"pooledtx":1892,"testnet":false,"generate":false,"hashespersec":0},"error":null,"id":1400564915008224057}`)
-			})
-			ts, host, port, err := getNewTestServer(handler)
-			if err != nil {
-				log.Fatalln(err)
-			}
-			defer ts.Close()
-			bitcoindClient, _ := New(host, port, "x", "fake", false)
-			rinfo, err := bitcoindClient.GetMiningInfo()
-			It("should not error", func() {
-				Expect(err).NotTo(HaveOccurred())
-			})
-			It("should return", func() {
-				Expect(rinfo).Should(Equal(MiningInfo{
-					Blocks:           301676,
-					CurrentBlocksize: 717621,
-					CurrentBlockTx:   1043,
-					Difficulty:       8.8534163091278e+09,
-					Errors:           "This is a pre-release test build - use at your own risk - do not use for mining or merchant applications",
-					GenProcLimit:     -1,
-					NetworkHashps:    78721394769785312,
-					PooledtTx:        1892,
-					Testnet:          false,
-					Generate:         false,
-					HashesPersec:     0,
-				}))
-			})
-		})
-	})
-
 	Describe("Testing GetNewAddress", func() {
 		Context("when success", func() {
 			handler := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {

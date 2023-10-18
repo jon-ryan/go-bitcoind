@@ -280,14 +280,15 @@ func (b *Bitcoind) GetWalletInfo() (*models.WalletInfo, error) {
 	return walletInfo, err
 }
 
-// GetMiningInfo returns an object containing mining-related information
-func (b *Bitcoind) GetMiningInfo() (miningInfo MiningInfo, err error) {
+func (b *Bitcoind) GetMiningInfo() (*models.MiningInfo, error) {
 	r, err := b.client.call("getmininginfo", nil)
 	if err = handleError(err, &r); err != nil {
-		return
+		return nil, err
 	}
+
+	miningInfo := &models.MiningInfo{}
 	err = json.Unmarshal(r.Result, &miningInfo)
-	return
+	return miningInfo, err
 }
 
 // GetNewAddress return a new address for account [account].
