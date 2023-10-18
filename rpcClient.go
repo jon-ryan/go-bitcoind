@@ -74,7 +74,7 @@ func newClient(host string, port int, user, passwd string, useSSL bool, timeout 
 	} else {
 		urlHttpPrefix = "http://"
 		httpClient = &http.Client{
-			Timeout: time.Duration(timeout),
+			Timeout: time.Duration(timeout) * time.Second,
 		}
 	}
 	c = &rpcClient{

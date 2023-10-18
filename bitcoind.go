@@ -238,7 +238,6 @@ func (b *Bitcoind) GetHashesPerSec() (hashpersec float64, err error) {
 	return
 }
 
-// GetMemPoolInfo returns an object containing mem pool info
 func (b *Bitcoind) GetMemPoolInfo() (*models.MemPoolInfo, error) {
 	r, err := b.client.call("getmempoolinfo", nil)
 	if err = handleError(err, &r); err != nil {
@@ -265,7 +264,7 @@ func (b *Bitcoind) GetNetworkInfo() (*models.NetworkInfo, error) {
 		return nil, err
 	}
 	networkInfo := &models.NetworkInfo{}
-	err = json.Unmarshal(r.Result, &networkInfo)
+	err = json.Unmarshal(r.Result, networkInfo)
 	return networkInfo, err
 }
 
@@ -275,7 +274,7 @@ func (b *Bitcoind) GetWalletInfo() (*models.WalletInfo, error) {
 		return nil, err
 	}
 	walletInfo := &models.WalletInfo{}
-	err = json.Unmarshal(r.Result, &walletInfo)
+	err = json.Unmarshal(r.Result, walletInfo)
 	return walletInfo, err
 }
 
@@ -286,7 +285,7 @@ func (b *Bitcoind) GetMiningInfo() (*models.MiningInfo, error) {
 	}
 
 	miningInfo := &models.MiningInfo{}
-	err = json.Unmarshal(r.Result, &miningInfo)
+	err = json.Unmarshal(r.Result, miningInfo)
 	return miningInfo, err
 }
 
