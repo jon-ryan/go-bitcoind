@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"errors"
 	"strconv"
+	"strings"
 
 	"github.com/jon-ryan/go-bitcoind/models"
 )
@@ -286,6 +287,24 @@ func (b *Bitcoind) GetMiningInfo() (*models.MiningInfo, error) {
 
 	miningInfo := &models.MiningInfo{}
 	err = json.Unmarshal(r.Result, miningInfo)
+
+	if strings.Contains(miningInfo.NetworkHashPerSecondString, ".") {
+		hashesIntegerString := strings.Split(miningInfo.NetworkHashPerSecondString, ".")[0]
+		hashes, err := strconv.ParseInt(hashesIntegerString, 10, 64)
+		if err != nil {
+			return nil, err
+		}
+		miningInfo.NetworkHashPerSecond = hashes
+	} else {
+		hashes, err := strconv.ParseInt(miningInfo.NetworkHashPerSecondString, 10, 64)
+		if err != nil {
+			return nil, err
+		}
+
+		miningInfo.NetworkHashPerSecond = hashes
+	}
+
+	miningInfo.NetworkHashPerSecond = 3
 	return miningInfo, err
 }
 
