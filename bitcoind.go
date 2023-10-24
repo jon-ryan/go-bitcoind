@@ -197,6 +197,16 @@ func (b *Bitcoind) GetChainTips() (tips []models.ChainTip, err error) {
 	return
 }
 
+func (b *Bitcoind) GetUptime() (uint64, error) {
+	r, err := b.client.call("uptime", nil)
+	if err = handleError(err, &r); err != nil {
+		return 0, err
+	}
+
+	uptime, err := strconv.ParseUint(string(r.Result), 10, 64)
+	return uptime, err
+}
+
 // GetConnectionCount returns the number of connections to other nodes.
 func (b *Bitcoind) GetConnectionCount() (count uint64, err error) {
 	r, err := b.client.call("getconnectioncount", nil)
