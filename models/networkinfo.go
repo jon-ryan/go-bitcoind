@@ -2,16 +2,16 @@ package models
 
 // See https://developer.bitcoin.org/reference/rpc/getnetworkinfo.html
 type NetworkInfo struct {
-	Version            uint64         `json:"version"`
+	Version            int64          `json:"version"`
 	Subversion         string         `json:"subversion"`
-	ProtocolVersion    uint64         `json:"protocolversion"`
+	ProtocolVersion    int64          `json:"protocolversion"`
 	LocalServices      string         `json:"localservices"`
 	LocalServicesNames []string       `json:"localservicesnames"`
 	LocalRelay         bool           `json:"localrelay"`
-	Timeoffset         uint64         `json:"timeoffset"`
-	Connections        uint64         `json:"connections"`
-	ConnectionsIn      uint64         `json:"connections_in"`
-	ConnectionsOut     uint64         `json:"connections_out"`
+	Timeoffset         int64          `json:"timeoffset"`
+	Connections        int64          `json:"connections"`
+	ConnectionsIn      int64          `json:"connections_in"`
+	ConnectionsOut     int64          `json:"connections_out"`
 	NetworkActive      bool           `json:"networkactive"`
 	Networks           []Network      `json:"networks"`
 	RelayFee           float64        `json:"relayfee"`
@@ -22,7 +22,7 @@ type NetworkInfo struct {
 
 type LocalAddress struct {
 	Address string  `json:"address"`
-	Port    uint64  `json:"port"`
+	Port    int64   `json:"port"`
 	Score   float64 `json:"score"`
 }
 
